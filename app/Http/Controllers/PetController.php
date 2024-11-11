@@ -62,7 +62,7 @@ class PetController extends Controller
      */
     public function showByStatus(Request $request): \Illuminate\Http\JsonResponse
     {
-        $statusString = $request->input('status');
+        $statusString = $request->query('status', []);
 
         if (!$statusString) {
             return response()->json([
@@ -72,7 +72,7 @@ class PetController extends Controller
 
         $statuses = explode(',', $statusString);
         $statuses = array_map('trim', $statuses);
-        $pets = Pet::whereIn('status', $statuses)->get();
+        $pets = Pet::with('tags')->whereIn('status', $statuses)->get();
 
         return response()->json($pets);
     }
@@ -187,7 +187,7 @@ class PetController extends Controller
                 $pet->photoUrls = json_encode($photoUrls);
                 $pet->save();
 
-                return response()->json($pet, 200);
+                return response()->json(['message' => 'Image upload success'], 200);
             } else {
                 return response()->json(['message' => 'Image upload failed'], 500);
             }
